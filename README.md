@@ -1,2 +1,2 @@
 # No Sweat
- An app i created to prove my sister wrong.
+ An app I created to prove my sister wrong.
