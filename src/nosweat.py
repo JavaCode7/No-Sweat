@@ -1,5 +1,6 @@
 from tkinter import Tk, Menu, scrolledtext, filedialog, END, messagebox
 from os.path import basename as bn
+from os import system
 
 filename: str = ""
 
@@ -8,10 +9,13 @@ window = Tk(className = " Text Editor")
 
 # Functions for Menubar
 def NSSave():
-    global filename
-    data = textArea.get("1.0", END+"-1c")
-    with open(filename, "w") as fn:
-        fn.write(data)
+    try:
+        global filename
+        with open(filename, "w") as fn:
+            data = textArea.get("1.0", END+"-1c")
+            fn.write(data)
+    except FileNotFoundError:
+        NSSaveAs()
 def NSSaveAs():
     file = filedialog.asksaveasfile(mode="w", defaultextension="*.tim", filetypes=(("Thulium 2 (*.tim)", "*.tim"), ("Thulium 1 (*.tlm)", "*.tlm"), ("Generic Text (*.txt)", "*.txt"), ("All files", "*.*")))
     global filename
@@ -37,6 +41,10 @@ def NSOpen():
         file.close()
 def NSAbout():
     label = messagebox.showinfo("About", "No Sweat (or NSCode) is a simple editor made with python.")
+def NSRun2():
+    system(f"thulium run {filename} a.tlmc")
+def NSRun1():
+    system(f"thulium execute {filename}")
 
 
 # Body of editor
@@ -47,11 +55,12 @@ textArea = scrolledtext.ScrolledText(window, width=window.winfo_reqwidth(), heig
 menu = Menu(window)
 window.config(menu=menu)
 filemenu = Menu(menu)
+runmenu = Menu(menu)
 menu.add_cascade(label="File", menu=filemenu)
 filemenu.add_command(label="New", command=NSNew)
 filemenu.add_command(label="Open", command=NSOpen)
 filemenu.add_command(label="Save", command=NSSave)
-filemenu.add_command(label = "Save As", command=NSSaveAs)
+filemenu.add_command(label="Save As", command=NSSaveAs)
 filemenu.add_separator()
 filemenu.add_command(label="Exit", command=window.quit)
 
@@ -59,6 +68,12 @@ filemenu.add_command(label="Exit", command=window.quit)
 helpMenu = Menu(menu)
 menu.add_cascade(label="Help")
 menu.add_cascade(label="About", command=NSAbout)
+
+# Running files
+menu.add_cascade(label="Run", menu=runmenu)
+runmenu.add_command(label="Thulium 1", command=NSRun1)
+runmenu.add_command(label="Thulium 2", command=NSRun2)
+
 # More Tk stuff
 textArea.pack()
 window.mainloop()
