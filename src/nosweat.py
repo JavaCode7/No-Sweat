@@ -1,6 +1,7 @@
-from tkinter import Tk, Menu, scrolledtext, filedialog, END, messagebox
+from tkinter import Tk, Menu, scrolledtext, filedialog, END, messagebox, simpledialog
 from os.path import basename as bn
 from os import system
+from pathlib import Path
 
 filename: str = ""
 
@@ -18,6 +19,7 @@ def NSSave(*args):
         NSSaveAs()
 def NSSaveAs(*args):
     file = filedialog.asksaveasfile(mode="w", defaultextension="*.tim", filetypes=(("Thulium 2 (*.tim)", "*.tim"), ("Thulium 1 (*.tlm)", "*.tlm"), ("Generic Text (*.txt)", "*.txt"), ("All files", "*.*")))
+    if file == None: return
     global filename
     filename = file.name
     window.title(f"{bn(file.name)} - No Sweat")
@@ -40,12 +42,17 @@ def NSOpen(*args):
         textArea.insert("1.0", contents)
         file.close()
 def NSAbout():
-    label = messagebox.showinfo("About", "No Sweat (or NSCode) is a simple editor made with python.")
+    messagebox.showinfo("About", "No Sweat (or NSCode) is a simple editor made with Python for the Thulium programming language.")
 def NSRun2(*args):
-    system(f"thulium run {filename} a.tlmc")
+    a: str = ""
+    for i in Path(filename).stem: a += format(ord(i), "X")
+    system(f"thulium run {filename} {a}.tlmc")
 def NSRun1(*args):
     system(f"thulium execute {filename}")
-
+def NSFind(*args):
+    findString = simpledialog.askstring("Find", "Find...")
+    data = textArea.get("1.0", END)
+    if findString in data: messagebox.showinfo("l", "It's here")
 
 # Body of editor
 window.title("No Sweat")
@@ -56,6 +63,7 @@ menu = Menu(window)
 window.config(menu=menu)
 filemenu = Menu(menu)
 runmenu = Menu(menu)
+editmenu = Menu(menu)
 menu.add_cascade(label="File", menu=filemenu)
 filemenu.add_command(label="New                (Ctrl-N)", command=NSNew)
 filemenu.add_command(label="Open              (Ctrl-O)", command=NSOpen)
@@ -69,19 +77,22 @@ menu.add_cascade(label="Run", menu=runmenu)
 runmenu.add_command(label="Thulium 1     (Ctrl-Shift-R)", command=NSRun1)
 runmenu.add_command(label="Thulium 2     (Ctrl-R)", command=NSRun2)
 
+# Edit Menu
+menu.add_cascade(label="Edit", menu=editmenu)
+editmenu.add_command(label="Find                (Ctrl-F)", command=NSFind)
 
-# Help menu
-helpMenu = Menu(menu)
+# Help/About
 menu.add_cascade(label="Help")
 menu.add_cascade(label="About", command=NSAbout)
 
 # Keyboard Bindings
-textArea.bind("<Control-o>", NSOpen)
-textArea.bind("<Control-n>", NSNew)
-textArea.bind("<Control-s>", NSSave)
-textArea.bind('<Control-Shift-KeyPress-S>', NSSaveAs)
-textArea.bind("<Control-r>", NSRun2)
-textArea.bind('<Control-Shift-KeyPress-R>', NSRun1)
+window.bind("<Control-o>", NSOpen)
+window.bind("<Control-n>", NSNew)
+window.bind("<Control-s>", NSSave)
+window.bind("<Control-Shift-KeyPress-S>", NSSaveAs)
+window.bind("<Control-r>", NSRun2)
+window.bind("<Control-Shift-KeyPress-R>", NSRun1)
+window.bind("<Control-f>", NSFind)
 
 # More Tk stuff
 textArea.pack()
