@@ -1,8 +1,10 @@
+# Imports
 from tkinter import Tk, Menu, scrolledtext, filedialog, END, messagebox, simpledialog
 from os.path import basename as bn
 from os import system
 from pathlib import Path
 
+# Constants
 filename: str = ""
 
 # Tk stuff
@@ -47,16 +49,18 @@ def NSRun2(*args):
     a: str = ""
     for i in Path(filename).stem: a += format(ord(i), "X")
     system(f"thulium run {filename} {a}.tlmc")
+    system(f"rm {a}.tlmc")
 def NSRun1(*args):
     system(f"thulium execute {filename}")
 def NSFind(*args):
-    findString = simpledialog.askstring("Find", "Find...")
-    data = textArea.get("1.0", END)
-    if findString in data: messagebox.showinfo("l", "It's here")
+    global filename
+    findString: str = simpledialog.askstring("Find", "Find...")
+    data: str = textArea.get("1.0", END)
+    messagebox.showinfo("Find", f"Found {str(data.upper().count(findString.upper()))} instance(s) of {findString} in {bn(filename)}") if data.upper().count(findString.upper()) > 0 else messagebox.showerror("Find", "No occurrences found")
 
 # Body of editor
 window.title("No Sweat")
-textArea = scrolledtext.ScrolledText(window, width=window.winfo_reqwidth(), height=window.winfo_reqheight())
+textArea = scrolledtext.ScrolledText(window, width=window.winfo_reqwidth(), height=window.winfo_reqheight(), bg="black", fg="green", font="Courier 16", cursor="circle", insertbackground="white")
 
 # Menu
 menu = Menu(window)
@@ -81,8 +85,7 @@ runmenu.add_command(label="Thulium 2     (Ctrl-R)", command=NSRun2)
 menu.add_cascade(label="Edit", menu=editmenu)
 editmenu.add_command(label="Find                (Ctrl-F)", command=NSFind)
 
-# Help/About
-menu.add_cascade(label="Help")
+# About
 menu.add_cascade(label="About", command=NSAbout)
 
 # Keyboard Bindings
